@@ -7,6 +7,7 @@ import os
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+    bio = models.TextField()
     business_permit = models.FileField(
         upload_to='permits/',
         validators=[FileExtensionValidator(allowed_extensions=['png', 'jpeg', 'jpg'])],
@@ -35,7 +36,7 @@ class Images(models.Model):
 
 class ActivePromo(models.Model):
     station = models.ForeignKey(GasStation, on_delete=models.CASCADE)
-    discount = models.IntegerField()
+    discount = models.TextField()
     expired_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
