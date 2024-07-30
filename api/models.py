@@ -17,8 +17,8 @@ class Profile(models.Model):
 
 
 class GasStation(models.Model):
-    owner = models.ForeignKey(User, on_delete=models.CASCADE)
-    station_name = models.TextField()
+    station_name = models.ForeignKey(User, on_delete=models.CASCADE)
+    gasoline_type = models.TextField()
     address = models.TextField()
     description = models.TextField()
     price = models.IntegerField()

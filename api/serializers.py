@@ -28,7 +28,7 @@ class UserSerializer(serializers.ModelSerializer):
 class GasStationSerializer(serializers.ModelSerializer):
     class Meta:
         model = GasStation
-        fields = ['owner', 'station_name', 'address', 'description', 'price']
+        fields = ['station_name', 'address', 'description', 'price']
 
 class ImagesSerializer(serializers.ModelSerializer):
     class Meta:
