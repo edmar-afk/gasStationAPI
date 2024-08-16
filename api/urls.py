@@ -13,4 +13,9 @@ urlpatterns = [
     
     path('gasoline/create/', views.GasolineCreateView.as_view(), name='gasoline-create'),
     path('gasoline/', views.GasolineListView.as_view(), name='gasoline-list'),
+    path('active-promo/', views.ActivePromoCreateView.as_view(), name='active-promo-create'),
+    path('user-promos/', views.UserPromosView.as_view(), name='user-promos'),
+    
+    path('delete-promo/<int:pk>/', views.ActivePromoDeleteView.as_view(), name='active-promo-delete'),
+    path('search/<str:last_name>/', views.UserListByLastNameView.as_view(), name='user-list-by-last-name'),
 ]

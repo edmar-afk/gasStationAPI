@@ -3,15 +3,16 @@ from rest_framework import generics, permissions, views
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth.models import User
 from rest_framework import status
-from .serializers import UserSerializer, ProfileSerializer, GasolineSerializer
+from .serializers import UserSerializer, ProfileSerializer, GasolineSerializer, ActivePromoSerializer
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
-from .models import Profile, Gasoline
+from .models import Profile, Gasoline, ActivePromo
 from rest_framework.views import APIView
 from django.http import FileResponse, Http404
 from django.shortcuts import get_object_or_404
 from django.views import View
 from rest_framework.decorators import api_view
+from django.db.models import Q
 
 
 class CreateUserView(generics.CreateAPIView):
@@ -78,3 +79,56 @@ class GasolineListView(generics.ListAPIView):
     def get_queryset(self):
         # Filter gasoline entries by the logged-in user
         return Gasoline.objects.filter(station=self.request.user)
+    
+class ActivePromoCreateView(generics.CreateAPIView):
+    queryset = ActivePromo.objects.all()
+    serializer_class = ActivePromoSerializer
+    permission_classes = [AllowAny]
+
+    def perform_create(self, serializer):
+        # Set the station field to the current user
+        serializer.save(station=self.request.user)
+
+    def post(self, request, *args, **kwargs):
+        serializer = ActivePromoSerializer(data=request.data)
+        if serializer.is_valid():
+            self.perform_create(serializer)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class UserPromosView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        promos = ActivePromo.objects.filter(station=user)
+        serializer = ActivePromoSerializer(promos, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+class ActivePromoDeleteView(generics.DestroyAPIView):
+    queryset = ActivePromo.objects.all()
+    serializer_class = ActivePromoSerializer
+
+    def delete(self, request, *args, **kwargs):
+        promo_id = kwargs.get('pk')
+        try:
+            promo = ActivePromo.objects.get(pk=promo_id)
+            self.perform_destroy(promo)
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except ActivePromo.DoesNotExist:
+            return Response({'detail': 'Promo not found.'}, status=status.HTTP_404_NOT_FOUND)
+        
+
+
+class UserListByLastNameView(APIView):
+    serializer_class = UserSerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        last_name = self.kwargs['last_name']
+        return User.objects.filter(last_name__icontains=last_name)
+    
+    def get(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.serializer_class(queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

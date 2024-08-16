@@ -36,11 +36,11 @@ class Images(models.Model):
 
 class ActivePromo(models.Model):
     station = models.ForeignKey(User, on_delete=models.CASCADE)
-    discount = models.TextField()
-    expired_at = models.DateTimeField(auto_now_add=True)
-    
+    title = models.TextField()
+    description = models.TextField()
+
     def __str__(self):
-        return self.station
+        return f"{self.title} for {self.station.username}"
     
 class Gasoline(models.Model):
     station = models.ForeignKey(User, on_delete=models.CASCADE)

@@ -14,7 +14,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'first_name', 'email', 'password', 'business_permit']
+        fields = ['id', 'username', 'first_name', 'email', 'last_name', 'password', 'business_permit']
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
@@ -38,11 +38,9 @@ class ImagesSerializer(serializers.ModelSerializer):
 class ActivePromoSerializer(serializers.ModelSerializer):
     class Meta:
         model = ActivePromo
-        fields = ['station', 'discount', 'expired_at']
-
-
+        fields = ['id', 'title', 'description']
 
 class GasolineSerializer(serializers.ModelSerializer):
     class Meta:
         model = Gasoline
-        fields = ['type', 'price']
+        fields = ['id', 'type', 'price']
