@@ -27,7 +27,7 @@ class GasStation(models.Model):
         return self.station_name
 
 class Images(models.Model):
-    station = models.ForeignKey(GasStation, on_delete=models.CASCADE)
+    station = models.ForeignKey(User, on_delete=models.CASCADE)
     imges = models.FileField(
         upload_to='images/',
         validators=[FileExtensionValidator(allowed_extensions=['png', 'jpeg', 'jpg'])],
@@ -35,9 +35,14 @@ class Images(models.Model):
 
 
 class ActivePromo(models.Model):
-    station = models.ForeignKey(GasStation, on_delete=models.CASCADE)
+    station = models.ForeignKey(User, on_delete=models.CASCADE)
     discount = models.TextField()
     expired_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
         return self.station
+    
+class Gasoline(models.Model):
+    station = models.ForeignKey(User, on_delete=models.CASCADE)
+    type = models.TextField()
+    price = models.TextField()

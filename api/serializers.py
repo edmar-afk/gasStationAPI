@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Profile, GasStation, Images, ActivePromo
+from .models import Profile, GasStation, Images, ActivePromo, Gasoline
 
 
 
@@ -39,3 +39,10 @@ class ActivePromoSerializer(serializers.ModelSerializer):
     class Meta:
         model = ActivePromo
         fields = ['station', 'discount', 'expired_at']
+
+
+
+class GasolineSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Gasoline
+        fields = ['type', 'price']

@@ -3,10 +3,10 @@ from rest_framework import generics, permissions, views
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth.models import User
 from rest_framework import status
-from .serializers import UserSerializer, ProfileSerializer
+from .serializers import UserSerializer, ProfileSerializer, GasolineSerializer
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
-from .models import Profile
+from .models import Profile, Gasoline
 from rest_framework.views import APIView
 from django.http import FileResponse, Http404
 from django.shortcuts import get_object_or_404
@@ -60,3 +60,21 @@ class ProfileDetailView(generics.RetrieveAPIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Profile.DoesNotExist:
             return Response({'error': 'Profile not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+
+class GasolineCreateView(generics.CreateAPIView):
+    queryset = Gasoline.objects.all()
+    serializer_class = GasolineSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        print(f"Creating gasoline with data: {self.request.data}")
+        serializer.save(station=self.request.user)
+        
+class GasolineListView(generics.ListAPIView):
+    serializer_class = GasolineSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        # Filter gasoline entries by the logged-in user
+        return Gasoline.objects.filter(station=self.request.user)
