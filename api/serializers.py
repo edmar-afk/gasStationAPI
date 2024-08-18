@@ -3,12 +3,6 @@ from django.contrib.auth.models import User
 from .models import Profile, GasStation, Images, ActivePromo, Gasoline
 
 
-
-class ProfileSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Profile
-        fields = ['business_permit']  # Removed 'user' as it's not needed in the input
-
 class UserSerializer(serializers.ModelSerializer):
     business_permit = serializers.FileField(write_only=True)
 
@@ -23,7 +17,13 @@ class UserSerializer(serializers.ModelSerializer):
         # Create Profile for the user
         Profile.objects.create(user=user, business_permit=business_permit)
         return user
-        
+
+class ProfileSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+
+    class Meta:
+        model = Profile
+        fields = ['user', 'bio', 'business_permit']   
         
 class GasStationSerializer(serializers.ModelSerializer):
     class Meta:
@@ -44,3 +44,16 @@ class GasolineSerializer(serializers.ModelSerializer):
     class Meta:
         model = Gasoline
         fields = ['id', 'type', 'price']
+        
+class UserSearchSerializer(serializers.ModelSerializer):
+    gasoline_entries = GasolineSerializer(source='gasoline_set', many=True, read_only=True)
+
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'first_name', 'email', 'last_name', 'gasoline_entries']
+        
+        
+class UpdateUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'email']

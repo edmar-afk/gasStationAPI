@@ -1,9 +1,9 @@
 # views.py
-from rest_framework import generics, permissions, views
+from rest_framework import generics, permissions, views, viewsets
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth.models import User
 from rest_framework import status
-from .serializers import UserSerializer, ProfileSerializer, GasolineSerializer, ActivePromoSerializer
+from .serializers import UserSerializer, ProfileSerializer, GasolineSerializer, ActivePromoSerializer, UserSearchSerializer, UpdateUserSerializer
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from .models import Profile, Gasoline, ActivePromo
@@ -121,14 +121,61 @@ class ActivePromoDeleteView(generics.DestroyAPIView):
 
 
 class UserListByLastNameView(APIView):
-    serializer_class = UserSerializer
+    serializer_class = UserSearchSerializer
     permission_classes = [AllowAny]
 
     def get_queryset(self):
         last_name = self.kwargs['last_name']
-        return User.objects.filter(last_name__icontains=last_name)
-    
+        return User.objects.filter(last_name__icontains=last_name).prefetch_related('gasoline_set')
+
     def get(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         serializer = self.serializer_class(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class GasolineDeleteAPIView(generics.DestroyAPIView):
+    queryset = Gasoline.objects.all()
+    serializer_class = GasolineSerializer
+    lookup_field = 'id'
+
+    def delete(self, request, *args, **kwargs):
+        gasoline_id = kwargs.get('id')
+        try:
+            gasoline = self.get_object()
+            gasoline.delete()
+            return Response({"detail": "Gasoline deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
+        except Gasoline.DoesNotExist:
+            return Response({"detail": "Gasoline not found."}, status=status.HTTP_404_NOT_FOUND)
+
+
+class GasolineUpdateAPIView(APIView):
+    def put(self, request, id, format=None):
+        try:
+            gasoline = Gasoline.objects.get(id=id)
+        except Gasoline.DoesNotExist:
+            return Response({'error': 'Gasoline not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = GasolineSerializer(gasoline, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class GasolineDetailView(generics.RetrieveAPIView):
+    queryset = Gasoline.objects.all()  # The queryset to be used for retrieving a single object
+    serializer_class = GasolineSerializer
+    permission_classes = [IsAuthenticated]
+    lookup_field = 'id'  # Field to look up the object
+    
+class UpdateUserView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request, *args, **kwargs):
+        user = request.user
+        serializer = UpdateUserSerializer(user, data=request.data, partial=True)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
