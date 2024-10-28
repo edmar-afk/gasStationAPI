@@ -29,12 +29,14 @@ class GasStationSerializer(serializers.ModelSerializer):
     class Meta:
         model = GasStation
         fields = ['station_name', 'address', 'description', 'price']
-
+        
 class ImagesSerializer(serializers.ModelSerializer):
-    station = UserSerializer()
+    station = serializers.PrimaryKeyRelatedField(read_only=True)
+
     class Meta:
         model = Images
         fields = ['station', 'imges']
+
 
 class ActivePromoSerializer(serializers.ModelSerializer):
     class Meta:
