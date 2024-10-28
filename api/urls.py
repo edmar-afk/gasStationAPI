@@ -25,4 +25,9 @@ urlpatterns = [
     
     path('gasoline/<int:id>/update/', views.GasolineUpdateAPIView.as_view(), name='gasoline-update'),
     path('view-gasoline/<int:id>/', views.GasolineDetailView.as_view(), name='gasoline-filter-by-id'),
+    
+    path('update-profile-pic/', views.UpdateProfilePicView.as_view(), name='update-profile-pic'),
+    
+    path('upload-image/<int:user_id>/', views.ImageUploadView.as_view(), name='upload-image'),
+    path('user-images/<int:user_id>/', views.UserImagesView.as_view(), name='user-images'),
 ]

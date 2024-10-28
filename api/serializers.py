@@ -23,7 +23,7 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Profile
-        fields = ['user', 'bio', 'business_permit']   
+        fields = ['user', 'bio', 'business_permit', 'profile_pic']   
         
 class GasStationSerializer(serializers.ModelSerializer):
     class Meta:
@@ -31,6 +31,7 @@ class GasStationSerializer(serializers.ModelSerializer):
         fields = ['station_name', 'address', 'description', 'price']
 
 class ImagesSerializer(serializers.ModelSerializer):
+    station = UserSerializer()
     class Meta:
         model = Images
         fields = ['station', 'imges']

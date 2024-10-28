@@ -12,6 +12,10 @@ class Profile(models.Model):
         upload_to='permits/',
         validators=[FileExtensionValidator(allowed_extensions=['png', 'jpeg', 'jpg'])],
     )
+    profile_pic = models.FileField(
+        upload_to='profilepic/',
+        validators=[FileExtensionValidator(allowed_extensions=['png', 'jpeg', 'jpg'])], blank=True, null=True
+    )
     
     def __str__(self):
         return self.user.username

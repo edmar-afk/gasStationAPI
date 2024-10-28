@@ -3,17 +3,17 @@ from rest_framework import generics, permissions, views, viewsets
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth.models import User
 from rest_framework import status
-from .serializers import UserSerializer, ProfileSerializer, GasolineSerializer, ActivePromoSerializer, UserSearchSerializer, UpdateUserSerializer
+from .serializers import UserSerializer, ProfileSerializer, GasolineSerializer, ImagesSerializer, ActivePromoSerializer, UserSearchSerializer, UpdateUserSerializer
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
-from .models import Profile, Gasoline, ActivePromo
+from .models import Profile, Gasoline, ActivePromo, Images
 from rest_framework.views import APIView
 from django.http import FileResponse, Http404
 from django.shortcuts import get_object_or_404
 from django.views import View
 from rest_framework.decorators import api_view
 from django.db.models import Q
-
+from rest_framework.generics import ListAPIView
 
 class CreateUserView(generics.CreateAPIView):
     queryset = User.objects.all()
@@ -179,3 +179,42 @@ class UpdateUserView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+class UpdateProfilePicView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request, *args, **kwargs):
+        profile = get_object_or_404(Profile, user=request.user)
+        serializer = ProfileSerializer(profile, data=request.data, partial=True)
+        
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+class ImageUploadView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, user_id):
+        # Retrieve the User object based on user_id
+        user = get_object_or_404(User, id=user_id)
+        
+        serializer = ImagesSerializer(data=request.data)
+        if serializer.is_valid():
+            # Save the image with the specified user as 'station'
+            serializer.save(station=user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    
+class UserImagesView(ListAPIView):
+    serializer_class = ImagesSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user_id = self.kwargs['user_id']
+        return Images.objects.filter(station_id=user_id)
