@@ -213,8 +213,17 @@ class ImageUploadView(APIView):
     
 class UserImagesView(ListAPIView):
     serializer_class = ImagesSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def get_queryset(self):
         user_id = self.kwargs['user_id']
         return Images.objects.filter(station_id=user_id)
+    
+class StationGasolineListView(generics.ListAPIView):
+    serializer_class = GasolineSerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        user_id = self.kwargs.get('userId')
+        # Filter gasoline entries by the specified user ID
+        return Gasoline.objects.filter(station_id=user_id)

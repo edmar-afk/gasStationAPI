@@ -30,4 +30,6 @@ urlpatterns = [
     
     path('upload-image/<int:user_id>/', views.ImageUploadView.as_view(), name='upload-image'),
     path('user-images/<int:user_id>/', views.UserImagesView.as_view(), name='user-images'),
+    
+    path('gasoline/<int:userId>/', views.StationGasolineListView.as_view(), name='station-gasoline-list'),
 ]
